@@ -1,6 +1,7 @@
 import Sidebar from "../../Components/sidebar";
 import CourseForm from "./CourseForm";
 import { useNavigate } from "react-router-dom";
+import API from "../../services/api";
 
 export default function AddCourse() {
   const navigate = useNavigate();
@@ -16,42 +17,35 @@ export default function AddCourse() {
     instructorName: "",
     instructorRole: "",
     instructorExperience: "",
+    category: "",
+    thumbnail: "",
   };
 
-  const handleAdd = (data) => {
-    const newCourse = {
-      id: Date.now(),
-      slug: data.slug,
-      title: data.title,
-      creator: "Admin",
-      rating: 0,
-      reviews: 0,
-      students: 0,
-      duration: data.duration,
-      totalLessons: Number(data.totalLessons),
-      language: data.language,
-      shortDescription: data.shortDescription,
-      longDescription: data.longDescription,
-      features: [],
-      offers: [],
-      modules: [],
-      test: { passPercentage: 60, questions: [] },
-      certificate: { available: false, template: "" },
-      progressRules: {
-        lessonCompletionRequired: true,
-        testRequired: false,
-        certificateAfterTest: false,
-      },
-      instructor: {
-        name: data.instructorName,
-        role: data.instructorRole,
-        experience: data.instructorExperience,
-        image: "",
-      },
-    };
+  const handleAdd = async (data) => {
+    try {
+      const token = localStorage.getItem("token");
 
-    console.log("ADD COURSE:", newCourse);
-    navigate("/admin/courses");
+      await API.post(
+        "/courses",
+        {
+          title: data.title,
+          description: data.shortDescription,
+          instructor: data.instructorName,
+          category: data.category,
+          thumbnail: data.thumbnail,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Course added successfully");
+      navigate("/admin/courses");
+    } catch (error) {
+      alert(error.response?.data?.message || "Add course failed");
+    }
   };
 
   return (

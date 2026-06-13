@@ -37,6 +37,21 @@ export default function CourseForm({ initialData, onSubmit, submitText }) {
       <input name="instructorName" value={form.instructorName}
         onChange={handleChange}
         placeholder="Instructor Name" className="border p-2 rounded" />
+        <input
+  name="category"
+  value={form.category || ""}
+  onChange={handleChange}
+  placeholder="Category (Frontend, Backend, MERN)"
+  className="border p-2 rounded"
+/>
+
+<input
+  name="thumbnail"
+  value={form.thumbnail || ""}
+  onChange={handleChange}
+  placeholder="Thumbnail URL"
+  className="border p-2 rounded"
+/>
 
       <input name="instructorRole" value={form.instructorRole}
         onChange={handleChange}

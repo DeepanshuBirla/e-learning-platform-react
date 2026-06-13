@@ -1,58 +1,94 @@
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import courseJson from "../../Data/coursesData.json";
 import Sidebar from "../../Components/sidebar";
 import CourseForm from "./CourseForm";
+import API from "../../services/api";
 
 export default function EditCourse() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const course = courseJson.courses.find(
-    (c) => c.id === Number(id)
-  );
+  const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!course) return <p>Course not found</p>;
+  const fetchCourse = async () => {
+    try {
+      const res = await API.get(`/courses/${id}`);
 
-  const initialData = {
-    title: course.title,
-    slug: course.slug,
-    duration: course.duration,
-    totalLessons: course.totalLessons,
-    language: course.language,
-    shortDescription: course.shortDescription,
-    longDescription: course.longDescription,
-    instructorName: course.instructor.name,
-    instructorRole: course.instructor.role,
-    instructorExperience: course.instructor.experience,
+      const course = res.data.course;
+
+      setInitialData({
+        title: course.title || "",
+        slug: course.slug || "",
+        duration: course.duration || "",
+        totalLessons: course.totalLessons || 0,
+        language: course.language || "English",
+        shortDescription: course.description || "",
+        longDescription: course.longDescription || "",
+        instructorName: course.instructor || "",
+        instructorRole: course.instructorRole || "",
+        instructorExperience: course.instructorExperience || "",
+        category: course.category || "",
+        thumbnail: course.thumbnail || "",
+      });
+    } catch (error) {
+      alert(error.response?.data?.message || "Course not found");
+      navigate("/admin/courses");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdate = (data) => {
-    const updatedCourse = {
-      ...course,
-      title: data.title,
-      slug: data.slug,
-      duration: data.duration,
-      totalLessons: Number(data.totalLessons),
-      language: data.language,
-      shortDescription: data.shortDescription,
-      longDescription: data.longDescription,
-      instructor: {
-        ...course.instructor,
-        name: data.instructorName,
-        role: data.instructorRole,
-        experience: data.instructorExperience,
-      },
-    };
+  useEffect(() => {
+    fetchCourse();
+  }, [id]);
 
-    console.log("UPDATED COURSE:", updatedCourse);
-    navigate("/admin/courses");
+  const handleUpdate = async (data) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await API.put(
+        `/courses/${id}`,
+        {
+          title: data.title,
+          description: data.shortDescription,
+          instructor: data.instructorName,
+          category: data.category,
+          thumbnail: data.thumbnail,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Course updated successfully");
+      navigate("/admin/courses");
+    } catch (error) {
+      alert(error.response?.data?.message || "Update course failed");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="p-6 bg-gray-100 min-h-screen w-full">
+          Loading course...
+        </div>
+      </div>
+    );
+  }
+
+  if (!initialData) return null;
 
   return (
     <div className="flex">
       <Sidebar />
       <div className="p-6 bg-gray-100 min-h-screen w-full">
         <h1 className="text-xl font-bold mb-4">Edit Course</h1>
+
         <CourseForm
           initialData={initialData}
           onSubmit={handleUpdate}

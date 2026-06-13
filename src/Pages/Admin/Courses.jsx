@@ -1,178 +1,47 @@
-// import { useState } from "react";
-// import courseJson from "../../Data/coursesData.json";
-// import Sidebar from "../../Components/sidebar";
-
-// export default function Courses() {
-//   const [courses, setCourses] = useState(courseJson.courses);
-
-//   // DELETE COURSE
-//   const deleteCourse = (id) => {
-//     if (!window.confirm("Delete this course?")) return;
-//     setCourses(courses.filter((c) => c.id !== id));
-//   };
-
-//   // ADD BASIC COURSE (minimal – baad me full form banega)
-//   const addCourse = () => {
-//     const newCourse = {
-//       id: Date.now(),
-//       slug: "new-course",
-//       title: "New Course",
-//       creator: "Admin",
-//       rating: 0,
-//       reviews: 0,
-//       students: 0,
-//       duration: "0 Hours",
-//       totalLessons: 0,
-//       language: "English",
-//       shortDescription: "New course description",
-//       longDescription: "",
-//       features: [],
-//       offers: [],
-//       modules: [],
-//       test: { passPercentage: 60, questions: [] },
-//       certificate: { available: false, template: "" },
-//       progressRules: {
-//         lessonCompletionRequired: true,
-//         testRequired: false,
-//         certificateAfterTest: false,
-//       },
-//       instructor: {
-//         name: "Admin",
-//         role: "Instructor",
-//         experience: "0 Years",
-//         image: "",
-//       },
-//     };
-
-//     setCourses([newCourse, ...courses]);
-//   };
-
-//   return (
-//     <div className="flex">
-//       <Sidebar />
-//       <div className="p-6 bg-gray-100 min-h-screen w-full">
-//         <div className="flex justify-between items-center mb-4">
-//           <h1 className="text-xl font-bold">Manage Courses</h1>
-
-//           <button
-//             onClick={addCourse}
-//             className="bg-blue-600 text-white px-4 py-2 rounded"
-//           >
-//             + Add Course
-//           </button>
-//         </div>
-
-//         {/* TABLE */}
-//         <div className="bg-white rounded shadow overflow-x-auto">
-//           <table className="min-w-full text-sm">
-//             <thead className="bg-gray-100">
-//               <tr>
-//                 <th className="p-2 text-left">Title</th>
-//                 <th className="p-2 text-left">Instructor</th>
-//                 <th className="p-2 text-center">Students</th>
-//                 <th className="p-2 text-center">Rating</th>
-//                 <th className="p-2 text-center">Lessons</th>
-//                 <th className="p-2 text-center">Certificate</th>
-//                 <th className="p-2 text-center">Actions</th>
-//               </tr>
-//             </thead>
-
-//             <tbody>
-//               {courses.map((course) => (
-//                 <tr key={course.id} className="border-b hover:bg-gray-50">
-//                   <td className="p-2 font-medium">
-//                     {course.title}
-//                     <p className="text-xs text-gray-500">
-//                       {course.shortDescription}
-//                     </p>
-//                   </td>
-
-//                   <td className="p-2">{course.instructor.name}</td>
-
-//                   <td className="p-2 text-center">{course.students}</td>
-
-//                   <td className="p-2 text-center">⭐ {course.rating}</td>
-
-//                   <td className="p-2 text-center">{course.totalLessons}</td>
-
-//                   <td className="p-2 text-center">
-//                     {course.certificate.available ? "Yes" : "No"}
-//                   </td>
-
-//                   <td className="p-2 text-center space-x-2">
-//                     <button className="bg-green-600 text-white px-3 py-1 rounded text-xs">
-//                       View
-//                     </button>
-
-//                     <button className="bg-yellow-500 text-white px-3 py-1 rounded text-xs">
-//                       Edit
-//                     </button>
-
-//                     <button
-//                       onClick={() => deleteCourse(course.id)}
-//                       className="bg-red-600 text-white px-3 py-1 rounded text-xs"
-//                     >
-//                       Delete
-//                     </button>
-//                   </td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-import { useState } from "react";
-import courseJson from "../../Data/coursesData.json";
+import { useEffect, useState } from "react";
 import Sidebar from "../../Components/sidebar";
 import DataTable from "../../Components/DataTable";
 import { useNavigate } from "react-router-dom";
+import API from "../../services/api";
 
 export default function Courses() {
-  const [courses, setCourses] = useState(courseJson.courses);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const deleteCourse = (id) => {
-    if (!window.confirm("Delete this course?")) return;
-    setCourses(courses.filter((c) => c.id !== id));
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const res = await API.get("/courses");
+      setCourses(res.data.courses || []);
+    } catch (error) {
+      alert(error.response?.data?.message || "Failed to fetch courses");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addCourse = () => {
-    const newCourse = {
-      id: Date.now(),
-      slug: "new-course",
-      title: "New Course",
-      creator: "Admin",
-      rating: 0,
-      reviews: 0,
-      students: 0,
-      duration: "0 Hours",
-      totalLessons: 0,
-      language: "English",
-      shortDescription: "New course description",
-      longDescription: "",
-      features: [],
-      offers: [],
-      modules: [],
-      test: { passPercentage: 60, questions: [] },
-      certificate: { available: false, template: "" },
-      progressRules: {
-        lessonCompletionRequired: true,
-        testRequired: false,
-        certificateAfterTest: false,
-      },
-      instructor: {
-        name: "Admin",
-        role: "Instructor",
-        experience: "0 Years",
-        image: "",
-      },
-    };
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
-    setCourses([newCourse, ...courses]);
+  const deleteCourse = async (id) => {
+    if (!window.confirm("Delete this course?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await API.delete(`/courses/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Course deleted successfully");
+      fetchCourses();
+    } catch (error) {
+      alert(error.response?.data?.message || "Delete failed");
+    }
   };
 
   const columns = [
@@ -182,37 +51,46 @@ export default function Courses() {
       render: (course) => (
         <div>
           <p className="font-medium">{course.title}</p>
-          <p className="text-xs text-gray-500">
-            {course.shortDescription}
-          </p>
+          <p className="text-xs text-gray-500">{course.description}</p>
         </div>
       ),
     },
     {
       key: "instructor",
       label: "Instructor",
-      render: (course) => course.instructor.name,
+      render: (course) => course.instructor || "N/A",
     },
     {
-      key: "students",
-      label: "Students",
+      key: "category",
+      label: "Category",
+      render: (course) => course.category || "N/A",
     },
     {
-      key: "rating",
-      label: "Rating",
-      render: (course) => `⭐ ${course.rating}`,
-    },
-    {
-      key: "totalLessons",
-      label: "Lessons",
-    },
-    {
-      key: "certificate",
-      label: "Certificate",
+      key: "thumbnail",
+      label: "Thumbnail",
       render: (course) =>
-        course.certificate.available ? "Yes" : "No",
+        course.thumbnail ? (
+          <img
+            src={course.thumbnail}
+            alt={course.title}
+            className="w-16 h-10 object-cover rounded mx-auto"
+          />
+        ) : (
+          "No Image"
+        ),
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <div className="p-6 bg-gray-100 min-h-screen w-full">
+          <h1 className="text-xl font-bold">Loading courses...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
@@ -223,8 +101,7 @@ export default function Courses() {
           <h1 className="text-xl font-bold">Manage Courses</h1>
 
           <button
-          onClick={() => navigate("/admin/courses/add")}
-            // onClick={addCourse}
+            onClick={() => navigate("/admin/courses/add")}
             className="bg-blue-600 text-white px-4 py-2 rounded w-full sm:w-auto"
           >
             + Add Course
@@ -238,16 +115,22 @@ export default function Courses() {
             pageSize={6}
             renderActions={(course) => (
               <div className="flex flex-wrap gap-2 justify-center">
-                <button className="bg-green-600 text-white px-3 py-1 rounded text-xs">
+                <button
+                  onClick={() => navigate(`/admin/courses/view/${course._id}`)}
+                  className="bg-green-600 text-white px-3 py-1 rounded text-xs"
+                >
                   View
                 </button>
+
                 <button
-                onClick={() => navigate(`/admin/courses/edit/${course.id}`)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded text-xs">
+                  onClick={() => navigate(`/admin/courses/edit/${course._id}`)}
+                  className="bg-yellow-500 text-white px-3 py-1 rounded text-xs"
+                >
                   Edit
                 </button>
+
                 <button
-                  onClick={() => deleteCourse(course.id)}
+                  onClick={() => deleteCourse(course._id)}
                   className="bg-red-600 text-white px-3 py-1 rounded text-xs"
                 >
                   Delete

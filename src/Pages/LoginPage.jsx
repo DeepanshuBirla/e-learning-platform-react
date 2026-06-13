@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -9,49 +10,42 @@ export default function LoginPage() {
     password: "",
   });
 
-  // 🔒 already logged-in user ko login page se hatao
-  useEffect(() => {
-    const isAuth = localStorage.getItem("isAuth");
-    if (isAuth === "true") {
-      navigate("/", { replace: true });
-    }
-  }, [navigate]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+    try {
+      setLoading(true);
 
-    const user = users.find(
-      (u) => u.email === form.email && u.password === form.password
-    );
-
-    if (!user) {
-      alert("❌ Invalid credentials");
-      return;
-    }
-
-    // ✅ save login session properly
-    localStorage.setItem("isAuth", "true");
-    localStorage.setItem("loggedInUser", JSON.stringify(user));
-    // LOGIN SUCCESS ke baad
-    localStorage.setItem(
-      "loggedInUser",
-      JSON.stringify({
+      const res = await API.post("/auth/login", {
         email: form.email,
-        role: "student", // future use
-        name: "Student User",
-      })
-    );
+        password: form.password,
+      });
 
-    alert("✅ Login successful");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("isAuth", "true");
+      localStorage.setItem("loggedInUser", JSON.stringify(res.data.user));
 
-    // 🔁 replace = true → back pe login nahi aayega
-    navigate("/student/profile", { replace: true });
+      alert("✅ Login successful");
+
+      if (res.data.user.role === "admin") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate("/student/profile", { replace: true });
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "❌ Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,7 +56,6 @@ export default function LoginPage() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email */}
           <div>
             <label className="block text-gray-700 mb-1">Email</label>
             <input
@@ -76,7 +69,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-700 mb-1">Password</label>
             <input
@@ -90,28 +82,27 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-800 transition"
+            disabled={loading}
+            className="w-full bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-800 transition disabled:bg-gray-400"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-        {/* Extra Links */}
         <div className="text-center mt-4">
           <p className="text-sm">
             Don't have an account?
-            <a href="/signup" className="text-blue-700 font-semibold ml-1">
+            <Link to="/signup" className="text-blue-700 font-semibold ml-1">
               Create Account
-            </a>
+            </Link>
           </p>
 
           <p className="text-sm mt-2">
-            <a href="/forgot-password" className="text-blue-600">
+            <Link to="/forgot-password" className="text-blue-600">
               Forgot Password?
-            </a>
+            </Link>
           </p>
         </div>
       </div>
