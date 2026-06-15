@@ -41,7 +41,6 @@ function App() {
       <Navbar />
 
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -51,7 +50,6 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/course/:slug" element={<CourseDetails />} />
 
-        {/* Affiliate Routes */}
         <Route path="/affiliate-login" element={<AffiliateLoginPage />} />
         <Route path="/affiliate-register" element={<AffiliateRegister />} />
         <Route path="/affiliate/dashboard" element={<AffiliateDashboard />} />
@@ -69,7 +67,6 @@ function App() {
           element={<AffiliateGenerateUrlPage />}
         />
 
-        {/* Student Protected Routes */}
         <Route
           path="/student"
           element={
@@ -133,7 +130,6 @@ function App() {
           }
         />
 
-        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
