@@ -1,4 +1,5 @@
 const express = require("express");
+const lessonRoutes = require("./routes/lessonRoutes");
 const testAttemptRoutes = require("./routes/testAttemptRoutes");
 const cors = require("cors");
 const mongoose = require("mongoose");
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
+app.use("/api/lessons", lessonRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
 app.use("/api/quizzes", quizRoutes);
