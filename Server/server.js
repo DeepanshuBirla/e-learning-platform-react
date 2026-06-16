@@ -1,4 +1,5 @@
 const express = require("express");
+const testAttemptRoutes = require("./routes/testAttemptRoutes");
 const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/enrollments", enrollmentRoutes);
+app.use("/api/test-attempts", testAttemptRoutes);
 app.use("/api/quizzes", quizRoutes);
 const PORT = process.env.PORT || 5000;
 

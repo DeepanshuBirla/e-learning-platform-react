@@ -4,6 +4,7 @@ const Course = require("../models/Course");
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
+const TestAttempt = require("../models/TestAttempt");
 
 // Create Quiz
 router.post("/:courseId", protect, async (req, res) => {
@@ -73,6 +74,9 @@ router.get("/:courseId", protect, async (req, res) => {
 });
 
 // Submit Quiz
+
+
+
 router.post("/submit/:courseId", protect, async (req, res) => {
   try {
     const { answers } = req.body;
@@ -101,6 +105,17 @@ router.post("/submit/:courseId", protect, async (req, res) => {
 
     const passed = percentage >= quiz.passPercentage;
 
+    
+    const attempt = await TestAttempt.create({
+  student: req.user._id,
+  course: req.params.courseId,
+  score,
+  total: quiz.questions.length,
+  percentage,
+  passed,
+});
+
+console.log("ATTEMPT SAVED:", attempt);
     res.status(200).json({
       success: true,
       score,

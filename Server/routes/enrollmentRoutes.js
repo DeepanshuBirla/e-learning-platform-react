@@ -1,6 +1,7 @@
 const express = require("express");
 const Enrollment = require("../models/Enrollment");
 const Course = require("../models/Course");
+const TestAttempt = require("../models/TestAttempt");
 const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -41,12 +42,7 @@ router.put("/progress/:courseId", protect, async (req, res) => {
     }
 
     enrollment.progress = Number(progress);
-
-    if (Number(progress) >= 100) {
-      enrollment.completed = true;
-    } else {
-      enrollment.completed = false;
-    }
+    enrollment.completed = Number(progress) >= 100;
 
     await enrollment.save();
 
@@ -65,9 +61,11 @@ router.put("/progress/:courseId", protect, async (req, res) => {
 // Certificate data
 router.get("/certificate/:courseId", protect, async (req, res) => {
   try {
+    const { courseId } = req.params;
+
     const enrollment = await Enrollment.findOne({
       user: req.user._id,
-      course: req.params.courseId,
+      course: courseId,
     }).populate("course");
 
     if (!enrollment) {
@@ -76,9 +74,21 @@ router.get("/certificate/:courseId", protect, async (req, res) => {
       });
     }
 
-    if (!enrollment.completed) {
+    if (!enrollment.completed || enrollment.progress < 100) {
       return res.status(400).json({
         message: "Complete course first",
+      });
+    }
+
+    const passedAttempt = await TestAttempt.findOne({
+      student: req.user._id,
+      course: courseId,
+      passed: true,
+    });
+
+    if (!passedAttempt) {
+      return res.status(400).json({
+        message: "Pass quiz first to unlock certificate",
       });
     }
 
@@ -87,6 +97,8 @@ router.get("/certificate/:courseId", protect, async (req, res) => {
       certificate: {
         student: req.user.name,
         course: enrollment.course.title,
+        score: passedAttempt.score,
+        percentage: passedAttempt.percentage,
         issuedDate: new Date(),
       },
     });
