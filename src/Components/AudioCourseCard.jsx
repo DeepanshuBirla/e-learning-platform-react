@@ -11,10 +11,15 @@ export default function AudioCourseCard({ course }) {
         </span>
 
         <img
-          src={course.instructor.image}
-          alt={course.title}
-          className="w-full h-full object-cover"
-        />
+  src={
+    course.thumbnail?.startsWith("http")
+      ? course.thumbnail
+      : course.image ||
+        "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80"
+  }
+  alt={course.title}
+  className="w-full h-full object-cover"
+/>
       </div>
       <div className="p-4">
         <h3 className="mt-3 font-bold">{course.title}</h3>
@@ -26,7 +31,10 @@ export default function AudioCourseCard({ course }) {
             {course.duration}
           </span>
         </div>
-        <p className="text-sm text-gray-600 mt-1">{course.shortDescription}</p>
+        <p className="text-sm text-gray-600 mt-1">
+  {course.description?.slice(0, 80) ||
+    "Professional audio learning course"}
+</p>
          <div className="mt-3 text-xs text-gray-500 space-y-1">
           <p>⭐ Rating: {course.rating}</p>
           <p>🎯 Mode: Online</p>
@@ -36,12 +44,12 @@ export default function AudioCourseCard({ course }) {
          <div className="mt-3 text-lg font-bold text-blue-700">
           ₹{course.price || "25,000"}
         </div>
-        <button
-          onClick={() => navigate(`/course/${course.slug}`)}
-          className="mt-4 w-full bg-green-600 text-white py-2 rounded"
-        >
-          Listen Now
-        </button>
+       <button
+  onClick={() => navigate(`/learn/${course._id}`)}
+  className="mt-4 w-full bg-green-600 text-white py-2 rounded"
+>
+  Start Learning
+</button>
       </div>
     </div>
   );

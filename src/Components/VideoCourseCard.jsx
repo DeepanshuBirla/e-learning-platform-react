@@ -8,15 +8,21 @@ export default function VideoCourseCard({ course }) {
       
       {/* Image Section */}
       <div className="relative h-40">
-        <span className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
-          🎥 VIDEO
-        </span>
-        <img
-          src={course.instructor.image}
-          alt={course.title}
-          className="w-full h-full object-cover"
-        />
-      </div>
+  <span className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded z-10">
+    🎥 VIDEO
+  </span>
+
+ <img
+  src={
+    course.thumbnail?.startsWith("http")
+      ? course.thumbnail
+      : course.image ||
+        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80"
+  }
+  alt={course.title}
+  className="w-full h-full object-cover"
+/>
+</div>
 
       {/* Content Section */}
       <div className="p-4 flex flex-col flex-1">
@@ -32,8 +38,8 @@ export default function VideoCourseCard({ course }) {
         </div>
 
         <p className="text-sm text-gray-600 mt-2">
-          {course.shortDescription}
-        </p>
+  {course.description?.slice(0, 80) || "Professional course for students"}
+</p>
 
         <div className="mt-3 text-xs text-gray-500 space-y-1">
           <p>⭐ Rating: {course.rating}</p>
@@ -45,12 +51,12 @@ export default function VideoCourseCard({ course }) {
         </div>
 
         {/* Button always at bottom */}
-        <button
-          onClick={() => navigate(`/course/${course.slug}`)}
-          className="mt-auto w-full bg-purple-600 text-white py-2 rounded"
-        >
-          View Course
-        </button>
+       <button
+  onClick={() => navigate(`/learn/${course._id}`)}
+  className="mt-auto w-full bg-purple-600 text-white py-2 rounded"
+>
+  Start Learning
+</button>
       </div>
     </div>
   );
